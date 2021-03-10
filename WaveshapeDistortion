@@ -1,0 +1,286 @@
+// (C) 2017-2020, Winry R. Litwa-Vulcu
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License-3.0
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+// ************************************************************************
+//
+// References:
+// Aarts, R.M., Larsen, E., and Schobben, D., 2002, 'Improving Perceived
+//   Bass and Reconstruction of High Frequencies for Band Limited Signals'
+//   Proc. 1st IEEE Benelux Workshop MPCA-2002, pp. 59-71
+// Arora et al., 2006, 'Low Complexity Virtual Bass Enhancement Algorithm
+//   for Portable Multimedia Device'
+//   AES 29th International Conferance, Seoul, Korea, 2006 September 2-4
+// Gerstle, B., 2009, 'Tunable Virtual Bass Enhancement', [ONLINE]
+//   <http://rabbit.eng.miami.edu/students/ddickey/pics/
+//   Gerstle_Final_Project.pdf>
+// Yates, R. and Lyons, R., 2008, 'DC Blocker Algorithms'
+//   IEEE Signal Processing Magazine, March 2008, pp. 132-134
+//
+// ************************************************************************
+//
+// soft clip alg:        y[n] = (1.5*x[n]) - (0.5*x[n]^3);
+// leaky integrator alg: y[n] = ((1 - A) * x[n]) + (A * y[n - 1]);
+// soft knee clip alg:   y[n] = x[n] / (K * abs(x[n]) + 1);
+// cubic soft clip alg:  y[n] = (1.5 * threshold * HardClip(x[n])) -
+//                                ((0.5 * HardClip(x[n])^3) / threshold);
+// warp alg: y[n] = (((x[n] * 1.5) - (0.5 * x[n]^3)) * (((2 * K) / (1 - K))
+//                    + 1)) / ((abs((x[n] * 1.5) - (0.5 * x[n]^3)) 
+//                    * ((2 * K) / (1 - K))) + 1);
+// rectify alg: y[n] = ((1 - R) * softclip(x[n])) + (|softclip(x[n])| * R);
+//
+// ************************************************************************
+
+
+desc: Waveshape Distortion 0.30
+// ************************************************************************
+// tags: waveshaping, non-linear distortion
+// author: Winry R. Litwa-Vulcu
+//
+// configure parameter adjustment GUI controls and set their defaults
+slider1:0<-12,12,0.1>Input Level (dB)
+slider2:0<0,1,2,3{ leaky integrator, soft-knee, cubic, warp}>Type:
+slider3:0.2300<0.0001,0.5000,0.0001>-Tc Rise:
+slider4:0.9827<0.5000,0.9999,0.0001>Integrator Tc:
+slider5:0.9500<0.0100,10.000,0.0100>Soft-Clip Knee:
+slider6:1.0<0, 1, 0.0001>-Cubic Soft Clip Threshold:
+slider7:0.5<0, 1, 0.0001>Cubic Harmonic Balance:
+slider8:0.0<-0.6, 0.8, 0.0001>Warp K Level:
+slider9:0<0,1.0, 0.0001>Input Rectification:
+slider10:0.9999<0.9990,0.9999,0.0001>-DC Cutoff:
+slider11:0<-12,12,0.1>Output Level (dB)
+// ************************************************************************
+
+
+@init
+// ************************************************************************
+// initialize constants and define user functions
+NLD0 = itm0 = otm0 = 0;
+NLD1 = itm1 = otm1 = 0;
+
+// soft clip of input signal
+function SoftClip(s)(
+  (s * 1.5) - (0.5 * s^3);
+);
+
+// hard clip of input signal
+function HardClip(s, thresh)(
+  0.5 * (abs(s + thresh) - abs(s - thresh));
+);
+
+// rectify audio signal by amount R
+function Rectify(sbuf)(
+  ((1 - slider9) * sbuf) + (abs(sbuf) * slider9);
+);
+
+// warp K parameter
+function WarpK(K)(
+  (2 * K) / (1 - K);
+);
+
+// use this to process audio via the Warp algorithm
+function Warp(sbuf)(
+  (1.8 - (slider8 + 0.6)) * ((SoftClip(sbuf) * (WarpK(slider8) + 1)) / 
+    ((abs(SoftClip(sbuf)) * WarpK(slider8)) + 1))
+);
+
+// cubic soft clip function
+function SoftCubicClip(s, thresh)(
+  threshInv = 1 / thresh;
+  threshInv * ((thresh * 1.5 * HardClip(s, thresh)) -
+    (0.5 * HardClip(s, thresh)^3 * threshInv));
+);
+  
+// use this to process audio via the SoftCubicClip algorithm
+function SoftCubic(sbuf)(
+  SoftCubicClip(sbuf, slider6)
+    + (slider7 * SoftCubicClip(abs(sbuf), slider6));
+);
+
+// soft clip function with adjustable knee
+function SKClip(s, knee)(
+  s / (knee * abs(s) + 1);
+);
+
+// use this to process audio via the SKClip algorithm
+function SoftKnee(sbuf)(
+  SKClip(sbuf, slider5) + ((slider5 / 2) * SKClip(abs(sbuf), slider5));
+);
+
+// use this to process audio via the leaky integrator algorithm
+function LeakyInt(sbuf, NLD)(
+  sbuf > NLD ? (
+    ((1 - slider3) * sbuf) + (slider3 * NLD);
+  ) : (
+    ((1 - slider4) * sbuf) + (slider4 * NLD);
+  );
+);
+
+// selects correct NLD algorithm based upon user input selection
+function waveshape(sbuf, NLD)(
+  slider2 > 0 ? (
+    slider2 > 1 ? (
+      slider2 > 2 ? (
+        invsqrt(2) * Warp(sbuf);
+      ) : (
+        invsqrt(2) * SoftCubic(sbuf);
+      );
+    ) : (
+      SoftKnee(sbuf);
+    );
+  ) : (
+    NLD = invsqrt(2) * LeakyInt(sbuf, NLD);
+  );
+);
+// ************************************************************************
+
+
+@slider
+// ************************************************************************
+// update volume control values when sliders are moved
+// use DoSeek conditional to ensure clickless volume changes
+InVol = 2^(slider1 / 6);
+OutVol = 2^(slider11 / 6);
+DoSeek = 1;
+// ************************************************************************
+
+
+@block
+// ************************************************************************
+// DoSeek conditional block process avoids clicking artifacts
+// when adjusting the Input/Output volume sliders
+DoSeek ? (
+  DAdjIn = (InVol - SAdjIn) / samplesblock;
+  DAdjOut = (OutVol - SAdjOut) / samplesblock;
+  DoSeek = 0;
+) : (
+  DAdjIn = DAdjOut = 0;
+  SAdjIn = InVol;
+  SAdjOut = OutVol;
+);
+// ************************************************************************
+
+
+
+@sample
+// ************************************************************************
+// don't mix the L and R channels together; adjust input gain and rectify
+sbuf0 = Rectify(spl0 * SAdjIn);
+sbuf1 = Rectify(spl1 * SAdjIn);
+
+// call function PBEcore to apply NLD to incoming audio samples
+NLD0 = waveshape(sbuf0, NLD0);
+NLD1 = waveshape(sbuf1, NLD1);
+
+// apply a DC blocker to processed audio
+otm0 = slider10 * otm0 + NLD0 - itm0;
+itm0 = NLD0;
+NLD0 = otm0;
+otm1 = slider10 * otm1 + NLD1 - itm1;
+itm1 = NLD1;
+NLD1 = otm1;
+
+// adjust output gain according to algorithm and Output Volume
+slider2 ? (
+  // limit output to +24 dBFS
+  spl0 = 2^(5 / 6) *min(max(NLD0 * SAdjOut, -16), 16) / 2;
+  spl1 = 2^(5 / 6) *min(max(NLD1 * SAdjOut, -16), 16) / 2;
+) : (
+  // limit output to +24 dBFS and add extra 3 dB of gain [to match levels]
+  spl0 = 2^(8 / 6) * min(max(NLD0 * SAdjOut, -16), 16) / 2;
+  spl1 = 2^(8 / 6) * min(max(NLD1 * SAdjOut, -16), 16) / 2;
+);
+
+// update incremental volume control level (for clickless volume)
+SAdjIn += DAdjIn;
+SAdjOut += DAdjOut;
+// ************************************************************************
+
+
+
+@serialize
+// ************************************************************************
+// The code in the @serialize section is executed when the plug-in
+// needs to load or save some extended state. The sliderX parameters
+// are saved automatically, but if there are internal state variables
+// or memory that should be saved, they should be saved/restored here
+// using file_var() or file_mem() (passing an argument of 0 for the
+// file handle). (If the code needs to detect whether it is saving or
+// loading, it can do so with file_avail() (file_avail(0) will return
+// <0 if it is writing). 
+//
+// Note when saving the state of variables or memory, they are stored
+// in a more compact 32 bit representation, so a slight precision loss
+// is possible. Note also that you should not clear any variables
+// saved/loaded by @serialize in @init, as sometimes @init will be
+// called following @serialize.
+// ************************************************************************
+
+
+
+@gfx
+// ************************************************************************
+// The @gfx section gets executed around 30 times a second when the
+// plug-ins GUI is open. You can do whatever processing you like in
+// this (Typically using gfx_*()). Note that this code runs in a
+// separate thread from the audio processing, so you may have both
+// running simultaneously which could leave certain variables/RAM in
+// an unpredictable state. 
+//
+// The @gfx section has two optional parameters, which can specify
+// the desired width/height of the graphics area. Set either of these
+// to 0 (or omit them) to specify that the code doesn't care what
+// size it gets. Note that these are simply hints to request this
+// size -- you may not always get the specified size. Your code in
+// this section should use the gfx_w, gfx_h variables to actually
+// determine drawing dimensions.
+
+//@gfx 192 192
+//gfxSize = min(gfx_w,gfx_h);
+
+//gfx_r=gfx_g=gfx_b=0; gfx_a=1;
+//gfx_x=gfx_y=0;
+//gfx_rectto(gfx_w,gfx_h);
+
+//gfx_r=gfx_g=gfx_b=0.8; gfx_a=1;
+//gfx_x=gfxSize/2; gfx_y=0;
+//gfx_lineto(gfxSize/2,gfxSize,0);
+//gfx_x=0; gfx_y=gfxSize/2;
+//gfx_lineto(gfxSize,gfxSize/2,0);
+
+//gfx_x = gfxSize-20; gfx_y = gfxSize/2;
+//gfx_drawchar($'I');
+//gfx_drawchar($'N');
+
+//gfx_x = gfxSize/2+2; gfx_y = 0;
+//gfx_drawchar($'O');
+//gfx_drawchar($'U');
+//gfx_drawchar($'T');
+
+// slider1 ? (
+//  gfx_r=0.5; gfx_g=1; gfx_b=0; gfx_a=1;
+//  gfx_x=0; gfx_y=gfxSize;
+//  x = -1;
+//  while(
+//    y = -(1+foo)*x/(1+foo*abs(x));
+//    gfx_lineto(x*gfxSize/2+gfxSize/2,y*gfxSize/2+gfxSize/2,1);
+//    (x+=0.05) <= 1;
+//  );
+//  gfx_lineto(gfxSize,0,1);
+//):(
+//  gfx_r=0.5; gfx_g=1; gfx_b=0; gfx_a=1;
+//  gfx_x=0; gfx_y=gfxSize;
+//  gfx_lineto(gfxSize,0,1);
+//);
+// ************************************************************************
