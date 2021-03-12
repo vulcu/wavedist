@@ -33,10 +33,10 @@ The `Input Rectification` is always active and can be used in addition to the ac
 #### To Do ####
 * Add oversampling + filtering to reduce aliasing artifacts
 
-## Installation
+## Installation ##
 To use this project, install it locally into your systems's `/Reaper/Effects` folder. On Windows 10, JSFX effects are usually located in `%appdata%\Reaper\Effects`. You may want to install it into another folder within that folder, such as %appdata%\Reaper\Effects\vulcu`.
 
-## Algorithms: ##
+## Algorithms ##
 This project uses the following algorithms for waveshaping and signal limiting:
 ```
  1) soft clip alg:        y[n] = (1.5*x[n]) - (0.5*x[n]^3);
@@ -56,4 +56,5 @@ This project uses the following algorithms for waveshaping and signal limiting:
  3) Gerstle, B., 2009, 'Tunable Virtual Bass Enhancement', [ONLINE] <http:rabbit.eng.miami.edu/students/ddickey/pics/Gerstle_Final_Project.pdf>
  4) Yates, R. and Lyons, R., 2008, 'DC Blocker Algorithms' IEEE Signal Processing Magazine, March 2008, pp. 132-134
 
+## ##
 (C) 2017-2020, Winry R. Litwa-Vulcu
