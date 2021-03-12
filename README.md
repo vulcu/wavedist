@@ -5,7 +5,7 @@ A stereo audio distortion plugin created in JSFX for the Reaper DAW.
 * [General Info](#general-info)
 * [Features](#features)
 * [Installation](#installation)
-* [Algorithms](#technologies)
+* [Algorithms](#algorithms)
 * [References](#references)
 
 ## General Info
@@ -33,6 +33,8 @@ The `Input Rectification` is always active and can be used in addition to the ac
 #### To Do ####
 * Add oversampling + filtering to reduce aliasing artifacts
 
+#### Status: This project is active but development is slow ####
+
 ## Installation ##
 To use this project, install it locally into your systems's `/Reaper/Effects` folder. On Windows 10, JSFX effects are usually located in `%appdata%\Reaper\Effects`. You may want to install it into another folder within that folder, such as %appdata%\Reaper\Effects\vulcu`.
 
@@ -57,4 +59,4 @@ This project uses the following algorithms for waveshaping and signal limiting:
  4) Yates, R. and Lyons, R., 2008, 'DC Blocker Algorithms' IEEE Signal Processing Magazine, March 2008, pp. 132-134
 
 ## ##
-(C) 2017-2020, Winry R. Litwa-Vulcu
+(C) 2017-2021, Winry R. Litwa-Vulcu
