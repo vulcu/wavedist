@@ -37,7 +37,7 @@ The `Input Rectification` is always active and can be used in addition to the ac
 #### Status: This project is active but considered complete. Additional features are unlikely to be added. ####
 
 ## Installation ##
-To use this project, install it locally into your systems's `/Reaper/Effects` folder. On Windows 10, JSFX effects are usually located in `%appdata%\Reaper\Effects`. You may want to install it into another folder within that folder, such as %appdata%\Reaper\Effects\vulcu`.
+To use this project, install it locally into your systems's `/Reaper/Effects` folder. On Windows 10, JSFX effects are usually located in `%appdata%\Reaper\Effects`. You may want to install it into another folder within that folder, such as `%appdata%\Reaper\Effects\vulcu`.
 
 ## Algorithms ##
 This project uses the following algorithms for waveshaping and signal limiting:
