@@ -1,5 +1,5 @@
 # WaveDist - Waveshaper Audio Distortion #
-A stereo audio distortion plugin created in JSFX for the Reaper DAW.
+A stereo audio distortion plugin created in [JSFX](https://www.reaper.fm/sdk/js/js.php) for the [Reaper DAW](https://www.reaper.fm/).
 
 ## Table of Contents ##
 * [General Info](#general-info)
