@@ -31,10 +31,10 @@ Each option in the drop-down has an associated slider to control it:
 The `Input Rectification` is always active and can be used in addition to the active waveshaper. It controls the amount by which the input signal is recified and can be set to `0.0` to disable it.
 
 #### To Do ####
-* Experiment with adding a `Wet/Dry` control (Reaper has a per-effect global one already so this may be redundant)
+* Add a `Wet/Dry` control (Reaper has a per-effect global one already so this may be redundant)
 * Add oversampling + filtering to reduce aliasing artifacts
 
-#### Status: This project is active but considered complete. Additional features are unlikely to be added. ####
+#### Status: This project is maintained but considered complete. Additional features are unlikely to be added. ####
 
 ## Installation ##
 To use this project, install it locally into your systems's `/Reaper/Effects` folder. On Windows 10, JSFX effects are usually located in `%appdata%\Reaper\Effects`. You may want to install it into another folder within that folder, such as `%appdata%\Reaper\Effects\vulcu`.
