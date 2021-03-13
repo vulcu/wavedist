@@ -34,7 +34,7 @@ The `Input Rectification` is always active and can be used in addition to the ac
 * Experiment with adding a `Wet/Dry` control (Reaper has a per-effect global one already so this may be redundant)
 * Add oversampling + filtering to reduce aliasing artifacts
 
-#### Status: This project is active but development is slow ####
+#### Status: This project is active but considered complete. Additional features are unlikely to be added. ####
 
 ## Installation ##
 To use this project, install it locally into your systems's `/Reaper/Effects` folder. On Windows 10, JSFX effects are usually located in `%appdata%\Reaper\Effects`. You may want to install it into another folder within that folder, such as %appdata%\Reaper\Effects\vulcu`.
