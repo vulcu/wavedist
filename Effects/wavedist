@@ -245,42 +245,4 @@ SAdjOut += DAdjOut;
 // size -- you may not always get the specified size. Your code in
 // this section should use the gfx_w, gfx_h variables to actually
 // determine drawing dimensions.
-
-//@gfx 192 192
-//gfxSize = min(gfx_w,gfx_h);
-
-//gfx_r=gfx_g=gfx_b=0; gfx_a=1;
-//gfx_x=gfx_y=0;
-//gfx_rectto(gfx_w,gfx_h);
-
-//gfx_r=gfx_g=gfx_b=0.8; gfx_a=1;
-//gfx_x=gfxSize/2; gfx_y=0;
-//gfx_lineto(gfxSize/2,gfxSize,0);
-//gfx_x=0; gfx_y=gfxSize/2;
-//gfx_lineto(gfxSize,gfxSize/2,0);
-
-//gfx_x = gfxSize-20; gfx_y = gfxSize/2;
-//gfx_drawchar($'I');
-//gfx_drawchar($'N');
-
-//gfx_x = gfxSize/2+2; gfx_y = 0;
-//gfx_drawchar($'O');
-//gfx_drawchar($'U');
-//gfx_drawchar($'T');
-
-// slider1 ? (
-//  gfx_r=0.5; gfx_g=1; gfx_b=0; gfx_a=1;
-//  gfx_x=0; gfx_y=gfxSize;
-//  x = -1;
-//  while(
-//    y = -(1+foo)*x/(1+foo*abs(x));
-//    gfx_lineto(x*gfxSize/2+gfxSize/2,y*gfxSize/2+gfxSize/2,1);
-//    (x+=0.05) <= 1;
-//  );
-//  gfx_lineto(gfxSize,0,1);
-//):(
-//  gfx_r=0.5; gfx_g=1; gfx_b=0; gfx_a=1;
-//  gfx_x=0; gfx_y=gfxSize;
-//  gfx_lineto(gfxSize,0,1);
-//);
 // ************************************************************************
